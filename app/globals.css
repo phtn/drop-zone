@@ -1,6 +1,23 @@
 @import 'tailwindcss';
 
+@font-face {
+  font-family: 'Okxs';
+  src: url('/fonts/okxs-regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Okxs';
+  src: url('/fonts/okxs-medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
+  --font-okxs: 'Okxs', Arial, sans-serif;
   --canvas: #f3f4f7;
   --surface: #ffffff;
   --surface-soft: #f8f9fc;
@@ -33,7 +50,7 @@ body {
   margin: 0;
   color: var(--ink);
   background: var(--canvas);
-  font-family: var(--font-geist-sans), Arial, sans-serif;
+  font-family: var(--font-okxs);
   -webkit-font-smoothing: antialiased;
 }
 

@@ -158,7 +158,7 @@ export const Library = ({
                       <Icon name={getFileIcon(file.name, file.mimeType)} className='size-7' />
                     </span>
                     <button type='button' onClick={() => selectFile(file.id)} title={file.name}>
-                      <strong>{file.name}</strong>
+                      <p className='text-sm'>{file.name}</p>
                       <small>{file.kind}</small>
                     </button>
                   </div>

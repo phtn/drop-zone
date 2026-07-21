@@ -11,22 +11,24 @@ export function MobileHeader({ search, setSearch, inputRef }: MobileHeaderProps)
   return (
     <header className='topbar'>
       <div className='brand' aria-label='Dropwell home'>
-        <Icon name='re-up.ph' size={21} />
-        <span>dropwell</span>
+        <Icon name='re-up.ph' className='size-4' />
+        <span className='tracking-wider'>dropzone</span>
       </div>
 
       <nav className='topbar-nav' aria-label='Workspace navigation'>
         <button className='active' type='button'>
           <Icon name='files' size={17} />
-          Files
+          <span className='font-normal text-base'>Files</span>
         </button>
         <button type='button'>
           <Icon name='activity' />
-          Activity
+
+          <span className='font-normal text-base'>Activity</span>
         </button>
         <button type='button'>
           <Icon name='sparkles' />
-          Automations
+
+          <span className='font-normal text-base'>Automations</span>
         </button>
       </nav>
 
