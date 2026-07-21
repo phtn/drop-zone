@@ -27,7 +27,7 @@ export function truncate(value: string, length: number) {
   return compact.length > length ? `${compact.slice(0, length).trim()}…` : compact
 }
 
-export function getFileIcon(name: string, mimeType: string, size = 22): IconName {
+export function getFileIcon(name: string, mimeType: string): IconName {
   const extension = fileExtension(name)
   if (mimeType.startsWith('image/')) return 'image'
   if (['csv', 'xls', 'xlsx'].includes(extension)) {

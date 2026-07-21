@@ -8,51 +8,69 @@ import { CategoryPill } from './library'
 interface QueueProps {
   queue: QueueItem[]
   activeQueueCount: number
-  completedCount: number
   removeItem: (id: string) => void
   retryItem: (id: string) => void
-  clearQueue: () => void
+  isOpen: boolean
+  onClose: () => void
 }
 
-export const Queue = ({ queue, activeQueueCount, completedCount, removeItem, retryItem, clearQueue }: QueueProps) => {
+export const Queue = ({
+  queue,
+  activeQueueCount,
+  removeItem,
+  retryItem,
+  isOpen,
+  onClose
+}: QueueProps) => {
+  if (queue.length === 0) return null
+
+  const errorCount = queue.filter((item) => item.status === 'error').length
+  const activeItem = queue.find((item) => item.status !== 'queued' && item.status !== 'error' && item.status !== 'done')
+  const primaryItem = activeItem ?? queue.find((item) => item.status === 'error') ?? queue[0]
+  const secondaryItem = queue.find((item) => item.id !== primaryItem.id)
+  const visibleItems = secondaryItem ? [primaryItem, secondaryItem] : [primaryItem]
+  const statusCopy =
+    activeQueueCount > 0
+      ? `${queue.length} file${queue.length === 1 ? '' : 's'} in queue`
+      : errorCount > 0
+        ? `${errorCount} need${errorCount === 1 ? 's' : ''} attention`
+        : 'Finishing upload'
+
   return (
-    <section className='queue-section' aria-labelledby='queue-title'>
+    <section
+      className={`queue-section queue-sheet ${isOpen ? 'open' : ''}`}
+      aria-labelledby='queue-title'
+      aria-hidden={!isOpen}
+      aria-live='polite'
+      inert={!isOpen}>
+      <div className='queue-sheet-handle' aria-hidden='true' />
       <div className='section-heading'>
         <div>
-          <span className='section-kicker'>Live processing</span>
+          <span className='section-kicker'>{errorCount > 0 ? 'Needs attention' : 'Live processing'}</span>
           <h2 id='queue-title'>Upload queue</h2>
         </div>
         <div className='queue-heading-actions'>
-          {queue.length > 0 ? (
-            <span>{activeQueueCount > 0 ? `${activeQueueCount} processing` : `${completedCount} complete`}</span>
-          ) : null}
-          {completedCount > 0 ? (
-            <button type='button' onClick={clearQueue}>
-              Clear completed
-            </button>
-          ) : null}
+          <span>{statusCopy}</span>
+          <button className='queue-sheet-close' type='button' onClick={onClose} aria-label='Hide upload queue'>
+            <Icon name='chevron-down' size={18} />
+          </button>
         </div>
       </div>
 
-      <div className='queue-list'>
-        {queue.length === 0 ? (
-          <div className='queue-empty'>
-            <span>
-              <Icon name='receipt' />
-            </span>
-            <div>
-              <strong>Your queue is clear</strong>
-              <p>Files begin processing as soon as you drop them.</p>
-            </div>
-          </div>
-        ) : (
-          queue.map((item) => (
-            <article className='queue-item' key={item.id}>
+      <div className={`queue-stack ${visibleItems.length > 1 ? 'has-preview' : ''}`}>
+        {visibleItems.map((item, index) => {
+          const isPreview = index === 1
+          return (
+            <article
+              className={`queue-item ${isPreview ? 'queue-item-preview' : ''}`}
+              key={item.id}
+              aria-hidden={isPreview}
+              inert={isPreview}>
               <div className='file-preview'>
                 {item.previewUrl ? (
                   <Image src={item.previewUrl} alt='preview' width={24} height={24} />
                 ) : (
-                  <Icon name={getFileIcon(item.file.name, item.file.type, 24)} />
+                  <Icon name={getFileIcon(item.file.name, item.file.type)} />
                 )}
               </div>
               <div className='queue-file-info'>
@@ -99,12 +117,12 @@ export const Queue = ({ queue, activeQueueCount, completedCount, removeItem, ret
                   type='button'
                   onClick={() => removeItem(item.id)}
                   aria-label={`Remove ${item.file.name} from queue`}>
-                  <Icon name='x' size={17} />
+                  <Icon name='close' size={17} />
                 </button>
               ) : null}
             </article>
-          ))
-        )}
+          )
+        })}
       </div>
     </section>
   )

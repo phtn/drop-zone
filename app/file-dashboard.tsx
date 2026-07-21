@@ -22,9 +22,18 @@ export function FileDashboard({ initialLibrary = [], initialStorageNotice = '' }
   const [search, setSearch] = useState('')
   const [activeCategory, setActiveCategory] = useState<CategoryName | 'All'>('All')
   const [storageNotice, setStorageNotice] = useState(initialStorageNotice)
+  const [isQueueOpen, setIsQueueOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const queueRef = useRef<QueueItem[]>([])
   const processingRef = useRef(false)
+
+  const openQueueSheet = useCallback(() => {
+    setIsQueueOpen(true)
+  }, [])
+
+  const closeQueueSheet = useCallback(() => {
+    setIsQueueOpen(false)
+  }, [])
 
   const syncQueue = useCallback((update: (items: QueueItem[]) => QueueItem[]) => {
     const next = update(queueRef.current)
@@ -95,7 +104,8 @@ export function FileDashboard({ initialLibrary = [], initialStorageNotice = '' }
         const payload = (await response.json()) as { file: StoredFile }
         setLibrary((current) => [payload.file, ...current])
         setStorageNotice('')
-        updateQueueItem(item.id, { status: 'done', progress: 100 })
+        if (item.previewUrl) URL.revokeObjectURL(item.previewUrl)
+        syncQueue((items) => items.filter((candidate) => candidate.id !== item.id))
       } catch (error) {
         updateQueueItem(item.id, {
           status: 'error',
@@ -106,7 +116,9 @@ export function FileDashboard({ initialLibrary = [], initialStorageNotice = '' }
     }
 
     processingRef.current = false
-  }, [updateQueueItem])
+    const hasErrors = queueRef.current.some((item) => item.status === 'error')
+    if (!hasErrors) setIsQueueOpen(false)
+  }, [syncQueue, updateQueueItem])
 
   const addFiles = useCallback(
     (fileList: FileList | globalThis.File[]) => {
@@ -121,18 +133,20 @@ export function FileDashboard({ initialLibrary = [], initialStorageNotice = '' }
         previewUrl: file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined
       }))
 
+      openQueueSheet()
       syncQueue((current) => [...current, ...nextItems])
       window.setTimeout(() => void processQueue(), 0)
     },
-    [processQueue, syncQueue]
+    [openQueueSheet, processQueue, syncQueue]
   )
 
   const retryItem = useCallback(
     (id: string) => {
+      openQueueSheet()
       updateQueueItem(id, { status: 'queued', error: undefined, progress: 0 })
       window.setTimeout(() => void processQueue(), 0)
     },
-    [processQueue, updateQueueItem]
+    [openQueueSheet, processQueue, updateQueueItem]
   )
 
   const removeQueueItem = useCallback(
@@ -140,18 +154,10 @@ export function FileDashboard({ initialLibrary = [], initialStorageNotice = '' }
       const item = queueRef.current.find((candidate) => candidate.id === id)
       if (item?.previewUrl) URL.revokeObjectURL(item.previewUrl)
       syncQueue((items) => items.filter((candidate) => candidate.id !== id))
+      if (queueRef.current.length === 0) closeQueueSheet()
     },
-    [syncQueue]
+    [closeQueueSheet, syncQueue]
   )
-
-  const clearCompleted = useCallback(() => {
-    for (const item of queueRef.current) {
-      if (item.status === 'done' && item.previewUrl) {
-        URL.revokeObjectURL(item.previewUrl)
-      }
-    }
-    syncQueue((items) => items.filter((item) => item.status !== 'done'))
-  }, [syncQueue])
 
   const deleteStoredFile = useCallback(
     async (id: string) => {
@@ -187,7 +193,6 @@ export function FileDashboard({ initialLibrary = [], initialStorageNotice = '' }
   }, [library])
 
   const activeQueueCount = queue.filter((item) => item.status !== 'done' && item.status !== 'error').length
-  const completedCount = queue.filter((item) => item.status === 'done').length
 
   return (
     <div className='app-shell'>
@@ -213,10 +218,10 @@ export function FileDashboard({ initialLibrary = [], initialStorageNotice = '' }
           <Queue
             queue={queue}
             activeQueueCount={activeQueueCount}
-            completedCount={completedCount}
             removeItem={removeQueueItem}
             retryItem={retryItem}
-            clearQueue={clearCompleted}
+            isOpen={isQueueOpen}
+            onClose={closeQueueSheet}
           />
 
           <Library
@@ -224,6 +229,7 @@ export function FileDashboard({ initialLibrary = [], initialStorageNotice = '' }
             activeCategory={activeCategory}
             setActiveCategory={setActiveCategory}
             search={search}
+            deleteFile={deleteStoredFile}
           />
         </div>
       </main>

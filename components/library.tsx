@@ -1,4 +1,3 @@
-import { deleteStoredFile } from '@/app/api/files/storage'
 import { CATEGORY_META } from '@/constants'
 import { Icon } from '@/lib/icons'
 import { CategoryName, StoredFile } from '@/types'
@@ -11,6 +10,7 @@ interface LibraryProps {
   activeCategory: CategoryName
   setActiveCategory: Dispatch<SetStateAction<CategoryName>>
   search: string
+  deleteFile: (id: string) => void
 }
 
 export function CategoryPill({ category }: { category: CategoryName }) {
@@ -36,7 +36,7 @@ function EmptyLibrary() {
   )
 }
 
-export const Library = ({ filteredLibrary, activeCategory, setActiveCategory, search }: LibraryProps) => {
+export const Library = ({ filteredLibrary, activeCategory, setActiveCategory, search, deleteFile }: LibraryProps) => {
   return (
     <section className='library-section' id='library' aria-labelledby='library-title'>
       <div className='section-heading'>
@@ -70,19 +70,21 @@ export const Library = ({ filteredLibrary, activeCategory, setActiveCategory, se
           {filteredLibrary.map((file) => (
             <article className='library-card' key={file.id}>
               <div className='library-card-top'>
-                <span className='library-file-icon'>{getFileIcon(file.name, file.mimeType, 23)}</span>
+                <div className='flex space-x-2'>
+                  <Icon name={getFileIcon(file.name, file.mimeType)} />
+                  <CategoryPill category={file.category} />
+                </div>
                 <button className='icon-button' type='button' aria-label={`More options for ${file.name}`}>
                   <MoreHorizontal size={18} />
                 </button>
               </div>
               <div className='library-card-body'>
-                <CategoryPill category={file.category} />
                 <h3 title={file.name}>{file.name}</h3>
-                <p>{file.excerpt || `${file.kind}, sorted by file type and filename.`}</p>
+                {/*<p>{file.excerpt || `${file.kind}, sorted by file type and filename.`}</p>*/}
               </div>
               <div className='library-card-footer'>
                 <div>
-                  <span>{file.kind}</span>
+                  <span className='uppercase'>{file.mimeType.split('/').pop()}</span>
                   <span>•</span>
                   <span>{formatBytes(file.size)}</span>
                 </div>
@@ -90,10 +92,7 @@ export const Library = ({ filteredLibrary, activeCategory, setActiveCategory, se
                   <a href={`/api/files/${encodeURIComponent(file.id)}`} aria-label={`Download ${file.name}`}>
                     Open
                   </a>
-                  <button
-                    type='button'
-                    onClick={() => void deleteStoredFile(file.id)}
-                    aria-label={`Delete ${file.name}`}>
+                  <button type='button' onClick={() => deleteFile(file.id)} aria-label={`Delete ${file.name}`}>
                     <Trash2 size={14} />
                   </button>
                 </div>
