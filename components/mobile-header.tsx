@@ -1,6 +1,5 @@
 import { Icon } from '@/lib/icons'
-import { Plus, Search } from 'lucide-react'
-import { RefObject } from 'react'
+import type { RefObject } from 'react'
 
 interface MobileHeaderProps {
   search: string
@@ -11,11 +10,28 @@ interface MobileHeaderProps {
 export function MobileHeader({ search, setSearch, inputRef }: MobileHeaderProps) {
   return (
     <header className='topbar'>
-      <button className='mobile-brand' type='button' aria-label='Dropwell home'>
-        <Icon name='re-up.ph' />
-      </button>
+      <div className='brand' aria-label='Dropwell home'>
+        <Icon name='re-up.ph' size={21} />
+        <span>dropwell</span>
+      </div>
+
+      <nav className='topbar-nav' aria-label='Workspace navigation'>
+        <button className='active' type='button'>
+          <Icon name='files' size={17} />
+          Files
+        </button>
+        <button type='button'>
+          <Icon name='activity' />
+          Activity
+        </button>
+        <button type='button'>
+          <Icon name='sparkles' />
+          Automations
+        </button>
+      </nav>
+
       <label className='search-field'>
-        <Search size={17} />
+        <Icon name='search' />
         <input
           type='search'
           value={search}
@@ -27,11 +43,15 @@ export function MobileHeader({ search, setSearch, inputRef }: MobileHeaderProps)
       </label>
       <div className='topbar-actions'>
         <span className='local-status'>
-          <span /> Local OCR
+          <span /> Private OCR
         </span>
+        <button className='notification-button' type='button' aria-label='Notifications'>
+          <Icon name='bell' />
+          <span />
+        </button>
         <button className='add-files-button' type='button' onClick={() => inputRef.current?.click()}>
-          <Plus size={17} />
-          Add files
+          <Icon name='add' />
+          Add new
         </button>
       </div>
     </header>

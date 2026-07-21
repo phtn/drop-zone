@@ -1,12 +1,13 @@
 'use client'
 
 import { DropZone } from '@/components/dropzone'
-import { Hero } from '@/components/hero'
+import { FileDetails } from '@/components/file-details'
 import { Library } from '@/components/library'
 import { MobileHeader } from '@/components/mobile-header'
 import { Queue } from '@/components/queue'
 import { Sidebar } from '@/components/sidebar'
-import { CategoryName, QueueItem, StoredFile } from '@/types'
+import { Icon } from '@/lib/icons'
+import type { CategoryName, QueueItem, StoredFile } from '@/types'
 import { analyzeFile } from '@/utils'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
@@ -23,6 +24,7 @@ export function FileDashboard({ initialLibrary = [], initialStorageNotice = '' }
   const [activeCategory, setActiveCategory] = useState<CategoryName | 'All'>('All')
   const [storageNotice, setStorageNotice] = useState(initialStorageNotice)
   const [isQueueOpen, setIsQueueOpen] = useState(false)
+  const [selectedFileId, setSelectedFileId] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const queueRef = useRef<QueueItem[]>([])
   const processingRef = useRef(false)
@@ -159,19 +161,27 @@ export function FileDashboard({ initialLibrary = [], initialStorageNotice = '' }
     [closeQueueSheet, syncQueue]
   )
 
+  const selectCategory = useCallback((category: CategoryName) => {
+    setActiveCategory(category)
+    setSelectedFileId(null)
+  }, [])
+
   const deleteStoredFile = useCallback(
     async (id: string) => {
       const previous = library
+      const previousSelectedFileId = selectedFileId
       setLibrary((current) => current.filter((file) => file.id !== id))
+      setSelectedFileId((current) => (current === id ? null : current))
       const response = await fetch(`/api/files/${encodeURIComponent(id)}`, {
         method: 'DELETE'
       })
       if (!response.ok) {
         setLibrary(previous)
+        setSelectedFileId(previousSelectedFileId)
         setStorageNotice('That file could not be removed. Please try again.')
       }
     },
-    [library]
+    [library, selectedFileId]
   )
 
   const filteredLibrary = useMemo(() => {
@@ -193,46 +203,77 @@ export function FileDashboard({ initialLibrary = [], initialStorageNotice = '' }
   }, [library])
 
   const activeQueueCount = queue.filter((item) => item.status !== 'done' && item.status !== 'error').length
+  const selectedFile = useMemo(
+    () => library.find((file) => file.id === selectedFileId) ?? null,
+    [library, selectedFileId]
+  )
 
   return (
     <div className='app-shell'>
-      <Sidebar
+      <MobileHeader search={search} setSearch={setSearch} inputRef={inputRef} />
+
+      <div className='dashboard-layout'>
+        <Sidebar
+          activeQueueCount={activeQueueCount}
+          library={library}
+          activeCategory={activeCategory}
+          setActiveCategory={selectCategory}
+          categoryCounts={categoryCounts}
+        />
+
+        <main className='main-content'>
+          <div className='workspace'>
+            <header className='workspace-header'>
+              <div>
+                <span className='workspace-eyebrow'>
+                  <Icon name='sparkles' /> Smart workspace
+                </span>
+                <h1>{activeCategory === 'All' ? 'All files' : activeCategory}</h1>
+                <p>Your local library, classified and ready when you need it.</p>
+              </div>
+              <div className='workspace-stats' aria-label='Library summary'>
+                <span>
+                  <strong>{filteredLibrary.length}</strong> files
+                </span>
+                <span>
+                  <strong>{categoryCounts.size}</strong> folders
+                </span>
+              </div>
+            </header>
+
+            <DropZone
+              isDragging={isDragging}
+              setIsDragging={setIsDragging}
+              addFiles={addFiles}
+              storageNotice={storageNotice}
+              inputRef={inputRef}
+            />
+
+            <Library
+              filteredLibrary={filteredLibrary}
+              categoryCounts={categoryCounts}
+              activeCategory={activeCategory}
+              setActiveCategory={selectCategory}
+              search={search}
+              deleteFile={deleteStoredFile}
+              selectedFileId={selectedFileId}
+              selectFile={setSelectedFileId}
+              onAddFiles={() => inputRef.current?.click()}
+            />
+          </div>
+        </main>
+
+        <FileDetails file={selectedFile} onClose={() => setSelectedFileId(null)} deleteFile={deleteStoredFile} />
+      </div>
+
+      <Queue
+        queue={queue}
         activeQueueCount={activeQueueCount}
-        library={library}
-        activeCategory={activeCategory}
-        setActiveCategory={setActiveCategory}
-        categoryCounts={categoryCounts}
+        removeItem={removeQueueItem}
+        retryItem={retryItem}
+        isOpen={isQueueOpen}
+        onClose={closeQueueSheet}
       />
-      <main className='main-content'>
-        <MobileHeader search={search} setSearch={setSearch} inputRef={inputRef} />
-        <div className='workspace'>
-          <Hero />
-          <DropZone
-            isDragging={isDragging}
-            setIsDragging={setIsDragging}
-            addFiles={addFiles}
-            storageNotice={storageNotice}
-            inputRef={inputRef}
-          />
-
-          <Queue
-            queue={queue}
-            activeQueueCount={activeQueueCount}
-            removeItem={removeQueueItem}
-            retryItem={retryItem}
-            isOpen={isQueueOpen}
-            onClose={closeQueueSheet}
-          />
-
-          <Library
-            filteredLibrary={filteredLibrary}
-            activeCategory={activeCategory}
-            setActiveCategory={setActiveCategory}
-            search={search}
-            deleteFile={deleteStoredFile}
-          />
-        </div>
-      </main>
     </div>
   )
 }

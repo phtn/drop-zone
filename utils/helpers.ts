@@ -33,7 +33,10 @@ export function getFileIcon(name: string, mimeType: string): IconName {
   if (['csv', 'xls', 'xlsx'].includes(extension)) {
     return 'table'
   }
-  if (mimeType === 'application/pdf' || ['pdf', 'doc', 'docx', 'txt', 'md', 'rtf'].includes(extension)) {
+  if (mimeType === 'application/pdf') {
+    return 'file-pdf'
+  }
+  if (['doc', 'docx', 'txt', 'md', 'rtf'].includes(extension)) {
     return 'file'
   }
   return 'file'

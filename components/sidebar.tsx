@@ -1,7 +1,7 @@
 import { CATEGORY_META } from '@/constants'
 import { Icon } from '@/lib/icons'
-import { CategoryName, StoredFile } from '@/types'
-import { Folder, HardDrive, ShieldCheck, Sparkles } from 'lucide-react'
+import type { CategoryName, StoredFile } from '@/types'
+import { formatBytes } from '@/utils'
 
 interface SidebarProps {
   activeQueueCount: number
@@ -18,73 +18,90 @@ export const Sidebar = ({
   setActiveCategory,
   categoryCounts
 }: SidebarProps) => {
-  return (
-    <div>
-      <aside className='sidebar'>
-        <div className='brand'>
-          <Icon name='re-up.ph' className='' />
-          <span>dropwell</span>
-        </div>
+  const storageUsed = library.reduce((total, file) => total + file.size, 0)
+  const storagePercent = Math.min(100, (storageUsed / (256 * 1024 * 1024)) * 100)
 
-        <nav className='primary-nav' aria-label='Primary navigation'>
-          <button className='nav-item active' type='button'>
-            <HardDrive size={18} />
-            Inbox
-            {activeQueueCount > 0 ? <span className='nav-count'>{activeQueueCount}</span> : null}
+  return (
+    <aside className='sidebar'>
+      <nav className='primary-nav' aria-label='File navigation'>
+        <button
+          className={`nav-item ${activeCategory === 'All' ? 'active' : ''}`}
+          type='button'
+          onClick={() => setActiveCategory('All')}>
+          <Icon name='file-blank' />
+          All files
+          <span className='nav-count'>{library.length}</span>
+        </button>
+        <button className='nav-item' type='button'>
+          <Icon name='clock' />
+          Recent
+        </button>
+        <button className='nav-item' type='button'>
+          <Icon name='favorite' />
+          Favorites
+        </button>
+        <button className='nav-item' type='button'>
+          <Icon name='upload' />
+          Uploads
+          {activeQueueCount > 0 ? <span className='nav-count queue-count'>{activeQueueCount}</span> : null}
+        </button>
+      </nav>
+
+      <div className='sidebar-section'>
+        <div className='sidebar-label'>
+          <span>Smart folders</span>
+          <Icon name='sparkles' />
+        </div>
+        <div className='folder-list'>
+          {(Object.keys(CATEGORY_META) as CategoryName[]).map((category) => {
+            const count = categoryCounts.get(category) ?? 0
+            if (category === 'All' || count === 0) return null
+            return (
+              <button
+                className={`folder-item ${activeCategory === category ? 'selected' : ''}`}
+                type='button'
+                key={category}
+                onClick={() => setActiveCategory(category)}>
+                <span className='folder-dot' style={{ background: CATEGORY_META[category].color }} />
+                <span>{category}</span>
+                <span>{count}</span>
+              </button>
+            )
+          })}
+          {categoryCounts.size === 0 ? <p className='folder-placeholder'>Folders appear as files are sorted.</p> : null}
+        </div>
+      </div>
+
+      <div className='sidebar-footer'>
+        <nav className='utility-nav' aria-label='Account navigation'>
+          <button className='nav-item' type='button'>
+            <Icon name='settings-fill' />
+            Settings
           </button>
-          <button
-            className='nav-item'
-            type='button'
-            onClick={() => {
-              setActiveCategory('All')
-              document.getElementById('library')?.scrollIntoView({ behavior: 'smooth' })
-            }}>
-            <Folder size={18} />
-            All files
-            <span className='nav-count subtle'>{library.length}</span>
+          <button className='nav-item' type='button'>
+            <Icon name='trash-delete' />
+            Deleted files
           </button>
         </nav>
 
-        <div className='sidebar-section'>
-          <div className='sidebar-label'>
-            <span>Smart folders</span>
-            <Sparkles size={13} />
+        <div className='storage-card'>
+          <div className='storage-card-heading'>
+            <span>
+              <Icon name='hard-drive' /> Local storage
+            </span>
+            <span>{Math.round(storagePercent)}%</span>
           </div>
-          <div className='folder-list'>
-            {(Object.keys(CATEGORY_META) as CategoryName[]).map((category) => {
-              const count = categoryCounts.get(category) ?? 0
-              if (count === 0) return null
-              return (
-                <button
-                  className={`folder-item ${activeCategory === category ? 'selected' : ''}`}
-                  type='button'
-                  key={category}
-                  onClick={() => {
-                    setActiveCategory(category)
-                    document.getElementById('library')?.scrollIntoView({ behavior: 'smooth' })
-                  }}>
-                  <span className='folder-dot' style={{ background: CATEGORY_META[category].color }} />
-                  {category}
-                  <span>{count}</span>
-                </button>
-              )
-            })}
-            {categoryCounts.size === 0 ? (
-              <p className='folder-placeholder'>Folders appear as files are sorted.</p>
-            ) : null}
+          <div className='storage-track' aria-hidden='true'>
+            <span style={{ width: `${Math.max(storagePercent, 2)}%` }} />
           </div>
+          <p>{formatBytes(storageUsed)} used of 256 MB</p>
         </div>
 
-        <div className='privacy-card'>
-          <span className='privacy-icon'>
-            <ShieldCheck size={19} />
-          </span>
-          <div>
-            <strong>Private by design</strong>
-            <p>OCR runs on this device before anything is uploaded.</p>
-          </div>
+        <div className='privacy-note'>
+          <Icon name='shield-check' />
+          <span>Stored locally and private by design</span>
         </div>
-      </aside>
-    </div>
+      </div>
+    </aside>
   )
 }

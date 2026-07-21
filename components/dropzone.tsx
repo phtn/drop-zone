@@ -1,5 +1,5 @@
 import { Icon } from '@/lib/icons'
-import { RefObject } from 'react'
+import type { RefObject } from 'react'
 
 interface DropZoneProps {
   isDragging: boolean
@@ -42,27 +42,27 @@ export function DropZone({ isDragging, setIsDragging, addFiles, storageNotice, i
           addFiles(event.dataTransfer.files)
         }}
         aria-label='File upload drop zone'>
-        <div className='drop-zone-grid' />
         <div className='drop-icon-wrap'>
-          <Icon name='parachute' className='size-16' />
-          <span className='drop-spark one' />
-          <span className='drop-spark two' />
+          <Icon name='upload' className='size-6' />
         </div>
-        <h2>{isDragging ? 'Release to add files' : 'Drop your files anywhere here'}</h2>
-        <p>Any file — up to 20 MB each.</p>
-        <button type='button' onClick={() => inputRef.current?.click()}>
-          Choose files
-          <Icon name='chevrons-right' size={15} />
-        </button>
-        <div className='drop-privacy'>
-          <Icon name='globe' size={13} />
-          Content is read locally before upload
+        <div className='drop-zone-copy'>
+          <span className='drop-zone-kicker'>Intelligent inbox</span>
+          <h2>{isDragging ? 'Release to organize' : 'Drop files here to organize them'}</h2>
+          <p>Content is classified privately on this device before it enters your library.</p>
+        </div>
+        <div className='drop-zone-actions'>
+          <span>
+            <Icon name='sparkles' /> Auto-sort enabled
+          </span>
+          <button type='button' onClick={() => inputRef.current?.click()}>
+            Browse files
+          </button>
         </div>
       </section>
 
       {storageNotice ? (
         <div className='notice' role='status'>
-          <Icon name='alert-fill' size={17} />
+          <Icon name='shield-check' />
           {storageNotice}
         </div>
       ) : null}
