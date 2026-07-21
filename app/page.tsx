@@ -1,19 +1,9 @@
+import { CATEGORY_NAMES } from '@/constants/meta'
+import { StoredFile } from '@/types'
 import { listStoredFiles, storageError, type FileRecord } from './api/files/storage'
-import { FileDashboard, type StoredFile } from './file-dashboard'
+import { FileDashboard } from './file-dashboard'
 
 export const dynamic = 'force-dynamic'
-
-const CATEGORY_NAMES: StoredFile['category'][] = [
-  'Receipts',
-  'Finance',
-  'Legal',
-  'Identity',
-  'Medical',
-  'Travel',
-  'Work',
-  'Personal',
-  'Other'
-]
 
 function toStoredFile(record: FileRecord): StoredFile {
   const category = CATEGORY_NAMES.find((candidate) => candidate === record.category) ?? 'Other'

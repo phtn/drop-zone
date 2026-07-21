@@ -1,5 +1,16 @@
-import { CategoryName, CategoryRule, QueueStatus } from '@/types'
+import { CategoryName, CategoryRule, QueueStatus, StoredFile } from '@/types'
 
+export const CATEGORY_NAMES: StoredFile['category'][] = [
+  'Receipts',
+  'Finance',
+  'Legal',
+  'Identity',
+  'Medical',
+  'Travel',
+  'Work',
+  'Personal',
+  'Other'
+]
 export const CATEGORY_META: Record<CategoryName, { color: string; background: string }> = {
   Receipts: { color: '#a44b14', background: '#fff0df' },
   Finance: { color: '#3f6d51', background: '#eaf5eb' },
