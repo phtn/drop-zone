@@ -13,6 +13,9 @@
 # testing
 /coverage
 
+# local Dropwell file library
+/.dropwell-data/
+
 # next.js
 /.next/
 /out/
