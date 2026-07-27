@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none"><metadata><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/"><rdf:Description><dc:creator>RealFaviconGenerator</dc:creator><dc:source>https://realfavicongenerator.net</dc:source></rdf:Description></rdf:RDF></metadata><g clip-path="url(#clip0_4561_36)">
+<rect width="16" height="16" rx="4" fill="white"></rect>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M8.41526 13.7894L14.1328 6.30065L14.0661 6.23398C13.9382 6.09971 13.7858 6.00836 13.6265 5.91289C13.6197 5.90882 13.6129 5.90474 13.6061 5.90065L8.84612 12.1273L10.2661 7.66732L9.81945 6.86732L7.99945 12.5873L6.15945 6.87398L5.71945 7.66732L7.15279 12.1273L2.38612 5.90732C2.21945 6.00065 2.05279 6.11398 1.91279 6.25398L1.85279 6.30732L7.5824 13.7894H8.41526ZM5.66612 6.40065C5.20612 5.57398 4.33279 5.00065 3.33279 5.00065C2.59279 5.00065 1.92612 5.30065 1.43945 5.78065C2.01945 2.66732 4.72612 0.333984 7.99945 0.333984C11.2528 0.333984 13.9595 2.66732 14.5395 5.76065C14.0595 5.28065 13.3928 5.00065 12.6661 5.00065C12.187 4.99732 11.7161 5.12546 11.3047 5.37113C10.8933 5.61679 10.5571 5.97057 10.3328 6.39398C9.86612 5.56732 8.99945 5.00065 7.99945 5.00065C7.52021 5.00089 7.05003 5.13125 6.63909 5.37782C6.22814 5.62439 5.89186 5.97791 5.66612 6.40065Z" fill="#3F50E4"></path>
+<path d="M6 15L8 14.5L10 15L8 15.5L6 15Z" stroke="#3F50E4"></path>
+</g><defs>
+<clipPath id="clip0_4561_36">
+<rect width="16" height="16" rx="4" fill="white"></rect>
+</clipPath>
+</defs></svg>

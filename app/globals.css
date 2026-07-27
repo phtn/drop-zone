@@ -261,6 +261,24 @@ input:focus-visible {
   border-radius: 50%;
   background: var(--accent);
 }
+.add-button {
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 15px;
+  cursor: pointer;
+  border: 0;
+  border-radius: 10px;
+  color: #fff;
+  background: linear-gradient(145deg, #5062f2, #3849df);
+  box-shadow: 0 8px 18px rgba(67, 85, 232, 0.2);
+  font-size: 12px;
+  font-weight: 650;
+  white-space: nowrap;
+  transition: 160ms ease;
+}
 
 .add-files-button,
 .panel-add-button {
@@ -531,6 +549,50 @@ input:focus-visible {
   padding: 6px 0 48px;
 }
 
+.workspace-header-stage,
+.workspace-library-stage {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  visibility: visible;
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    grid-template-rows 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 220ms ease,
+    transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s;
+}
+
+.workspace-header-stage > .workspace-header,
+.workspace-library-stage-content {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.workspace.drop-zone-mode .workspace-header-stage {
+  grid-template-rows: minmax(0, 0fr);
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(-28px);
+  transition:
+    grid-template-rows 480ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 180ms ease,
+    transform 360ms cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s 480ms;
+}
+
+.workspace.drop-zone-mode .workspace-library-stage {
+  grid-template-rows: minmax(0, 0fr);
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(34px);
+  transition:
+    grid-template-rows 560ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 200ms ease,
+    transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s 560ms;
+}
+
 .workspace-header {
   display: flex;
   align-items: flex-end;
@@ -590,19 +652,54 @@ input:focus-visible {
 /* Intelligent drop area */
 
 .drop-zone {
+  position: relative;
+  isolation: isolate;
   min-height: 118px;
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  display: flex;
   align-items: center;
-  gap: 17px;
   padding: 20px 22px;
+  overflow: hidden;
   border: 1px dashed #cfd5e7;
   border-radius: 16px;
   background:
     radial-gradient(circle at 86% 18%, rgba(80, 98, 242, 0.09), transparent 27%),
     linear-gradient(135deg, #fff 0%, #fafbff 100%);
   box-shadow: var(--shadow-sm);
-  transition: 180ms ease;
+  transition:
+    min-height 620ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 180ms ease,
+    box-shadow 320ms ease,
+    transform 180ms ease;
+}
+
+.drop-zone::before {
+  position: absolute;
+  inset: 18px;
+  z-index: 0;
+  content: '';
+  pointer-events: none;
+  border: 1px dashed rgba(99, 113, 226, 0.38);
+  border-radius: 13px;
+  opacity: 0;
+  transform: scale(0.985);
+  transition:
+    opacity 240ms ease,
+    transform 480ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.drop-zone.is-expanded {
+  min-height: clamp(480px, calc(100dvh - 150px), 760px);
+  border-color: rgba(99, 113, 226, 0.62);
+  background:
+    radial-gradient(circle at 50% 42%, rgba(86, 103, 240, 0.13), transparent 34%),
+    radial-gradient(circle at 90% 8%, rgba(119, 131, 239, 0.12), transparent 25%),
+    linear-gradient(145deg, #ffffff 0%, #f7f8ff 100%);
+  box-shadow: 0 24px 60px rgba(45, 57, 145, 0.12);
+}
+
+.drop-zone.is-expanded::before {
+  opacity: 1;
+  transform: scale(1);
 }
 
 .drop-zone:hover,
@@ -614,6 +711,53 @@ input:focus-visible {
 .drop-zone.dragging {
   background: var(--accent-soft);
   transform: translateY(-2px);
+}
+
+.drop-zone.is-expanded.dragging {
+  border-color: var(--accent);
+  box-shadow:
+    0 0 0 4px rgba(67, 85, 232, 0.08),
+    0 24px 60px rgba(45, 57, 145, 0.14);
+  transform: none;
+}
+
+.drop-zone-collapsed {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 17px;
+  visibility: visible;
+  transition: visibility 0s;
+}
+
+.drop-zone-collapsed .drop-icon-wrap,
+.drop-zone-collapsed .drop-zone-copy,
+.drop-zone-collapsed .drop-zone-actions {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 180ms ease,
+    transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.drop-zone.is-expanded .drop-zone-collapsed {
+  visibility: hidden;
+  pointer-events: none;
+  transition: visibility 0s 240ms;
+}
+
+.drop-zone.is-expanded .drop-icon-wrap,
+.drop-zone.is-expanded .drop-zone-copy {
+  opacity: 0;
+  transform: translateY(-30px);
+}
+
+.drop-zone.is-expanded .drop-zone-actions {
+  opacity: 0;
+  transform: translateY(30px);
 }
 
 .drop-icon-wrap {
@@ -658,6 +802,8 @@ input:focus-visible {
 .drop-zone-actions {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
   gap: 14px;
 }
 
@@ -693,7 +839,160 @@ input:focus-visible {
   color: var(--accent);
 }
 
+.drop-zone-actions .add-button {
+  border-color: transparent;
+  color: #fff;
+  background: linear-gradient(145deg, #5062f2, #3849df);
+  box-shadow: 0 8px 18px rgba(67, 85, 232, 0.2);
+}
+
+.drop-zone-actions .add-button:hover {
+  border-color: transparent;
+  color: #fff;
+  background: linear-gradient(145deg, #4558eb, #2f41d3);
+}
+
+.expanded-drop-zone {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 68px 34px 42px;
+  visibility: hidden;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(22px) scale(0.985);
+  transition:
+    opacity 180ms ease,
+    transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s 420ms;
+}
+
+.drop-zone.is-expanded .expanded-drop-zone {
+  visibility: visible;
+  pointer-events: auto;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition:
+    opacity 260ms ease 180ms,
+    transform 540ms cubic-bezier(0.22, 1, 0.36, 1) 100ms,
+    visibility 0s;
+}
+
+.expanded-drop-zone-close {
+  position: absolute;
+  top: 34px;
+  right: 34px;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  cursor: pointer;
+  place-items: center;
+  border: 1px solid rgba(211, 216, 234, 0.86);
+  border-radius: 11px;
+  color: #656b7e;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(12px);
+  transition: 160ms ease;
+}
+
+.expanded-drop-zone-close:hover {
+  border-color: #c5cbe0;
+  color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.expanded-drop-zone-content {
+  width: min(100%, 620px);
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  text-align: center;
+}
+
+.expanded-drop-zone-icon {
+  width: 92px;
+  height: 92px;
+  display: grid;
+  margin-bottom: 28px;
+  place-items: center;
+  border: 1px solid rgba(116, 130, 235, 0.2);
+  border-radius: 28px;
+  color: #fff;
+  background: linear-gradient(145deg, #6879f5, #3d50de);
+  box-shadow:
+    0 20px 40px rgba(61, 80, 222, 0.24),
+    0 0 0 12px rgba(75, 92, 229, 0.06);
+}
+
+.expanded-drop-zone .drop-zone-kicker {
+  margin-bottom: 12px;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+}
+
+.expanded-drop-zone h2 {
+  font-size: clamp(27px, 4vw, 42px);
+  line-height: 1.05;
+  letter-spacing: -0.045em;
+}
+
+.expanded-drop-zone p {
+  max-width: 540px;
+  margin-top: 15px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.expanded-drop-zone-actions {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.expanded-drop-zone-actions button {
+  min-width: 150px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 20px;
+  cursor: pointer;
+  border: 0;
+  border-radius: 12px;
+  color: #fff;
+  background: linear-gradient(145deg, #5365f2, #3548da);
+  box-shadow: 0 12px 26px rgba(67, 85, 232, 0.24);
+  font-size: 12px;
+  font-weight: 650;
+  transition: 160ms ease;
+}
+
+.expanded-drop-zone-actions button:hover {
+  box-shadow: 0 15px 30px rgba(67, 85, 232, 0.3);
+  transform: translateY(-1px);
+}
+
+.expanded-drop-zone-actions > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #858a9b;
+  font-size: 10px;
+}
+
+.expanded-drop-zone-actions > span svg {
+  color: var(--green);
+}
+
 .notice {
+  max-height: 120px;
   display: flex;
   align-items: flex-start;
   gap: 9px;
@@ -705,6 +1004,26 @@ input:focus-visible {
   background: #fffaf1;
   font-size: 10.5px;
   line-height: 1.45;
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    max-height 360ms ease,
+    margin 360ms ease,
+    padding 360ms ease,
+    border-width 360ms ease,
+    opacity 180ms ease,
+    transform 360ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.workspace.drop-zone-mode .drop-zone-shell > .notice {
+  max-height: 0;
+  margin-top: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  overflow: hidden;
+  border-width: 0;
+  opacity: 0;
+  transform: translateY(18px);
 }
 
 /* Shared panels */
@@ -1675,6 +1994,15 @@ input:focus-visible {
   .local-status {
     display: none;
   }
+
+  .drop-zone-collapsed {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .drop-zone-actions {
+    grid-column: 1 / -1;
+    padding-left: 65px;
+  }
 }
 
 @media (max-width: 1100px) {
@@ -1766,7 +2094,7 @@ input:focus-visible {
     padding-bottom: 32px;
   }
 
-  .drop-zone {
+  .drop-zone-collapsed {
     grid-template-columns: auto minmax(0, 1fr);
   }
 
@@ -1832,6 +2160,18 @@ input:focus-visible {
     padding: 17px;
   }
 
+  .drop-zone.is-expanded {
+    min-height: clamp(430px, calc(100dvh - 112px), 680px);
+  }
+
+  .drop-zone.is-expanded::before {
+    inset: 12px;
+  }
+
+  .drop-zone-collapsed {
+    align-items: flex-start;
+  }
+
   .drop-zone-actions {
     align-items: stretch;
     flex-direction: column;
@@ -1840,6 +2180,26 @@ input:focus-visible {
 
   .drop-zone-actions button {
     width: 100%;
+  }
+
+  .expanded-drop-zone {
+    padding: 62px 28px 34px;
+  }
+
+  .expanded-drop-zone-close {
+    top: 25px;
+    right: 25px;
+  }
+
+  .expanded-drop-zone-icon {
+    width: 78px;
+    height: 78px;
+    margin-bottom: 24px;
+    border-radius: 23px;
+  }
+
+  .expanded-drop-zone h2 {
+    font-size: clamp(25px, 9vw, 34px);
   }
 
   .quick-access-panel {

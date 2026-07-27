@@ -20,6 +20,7 @@ export function FileDashboard({ initialLibrary = [], initialStorageNotice = '' }
   const [queue, setQueue] = useState<QueueItem[]>([])
   const [library, setLibrary] = useState<StoredFile[]>(initialLibrary)
   const [isDragging, setIsDragging] = useState(false)
+  const [isDropZoneExpanded, setIsDropZoneExpanded] = useState(false)
   const [search, setSearch] = useState('')
   const [activeCategory, setActiveCategory] = useState<CategoryName | 'All'>('All')
   const [storageNotice, setStorageNotice] = useState(initialStorageNotice)
@@ -222,44 +223,52 @@ export function FileDashboard({ initialLibrary = [], initialStorageNotice = '' }
         />
 
         <main className='main-content'>
-          <div className='workspace'>
-            <header className='workspace-header'>
-              <div>
-                <span className='workspace-eyebrow'>
-                  <Icon name='sparkles' /> Smart workspace
-                </span>
-                <h1>{activeCategory === 'All' ? 'All files' : activeCategory}</h1>
-                <p>Your local library, classified and ready when you need it.</p>
-              </div>
-              <div className='workspace-stats' aria-label='Library summary'>
-                <span>
-                  <strong>{filteredLibrary.length}</strong> files
-                </span>
-                <span>
-                  <strong>{categoryCounts.size}</strong> folders
-                </span>
-              </div>
-            </header>
+          <div className={`workspace ${isDropZoneExpanded ? 'drop-zone-mode' : ''}`}>
+            <div className='workspace-header-stage' aria-hidden={isDropZoneExpanded} inert={isDropZoneExpanded}>
+              <header className='workspace-header'>
+                <div>
+                  <span className='workspace-eyebrow'>
+                    <Icon name='sparkles' /> Smart workspace
+                  </span>
+                  <h1>{activeCategory === 'All' ? 'All files' : activeCategory}</h1>
+                  <p>Your local library, classified and ready when you need it.</p>
+                </div>
+                <div className='workspace-stats' aria-label='Library summary'>
+                  <span>
+                    <strong>{filteredLibrary.length}</strong> files
+                  </span>
+                  <span>
+                    <strong>{categoryCounts.size}</strong> folders
+                  </span>
+                </div>
+              </header>
+            </div>
 
             <DropZone
               isDragging={isDragging}
               setIsDragging={setIsDragging}
+              isExpanded={isDropZoneExpanded}
+              onExpandedChange={setIsDropZoneExpanded}
               addFiles={addFiles}
               storageNotice={storageNotice}
               inputRef={inputRef}
             />
 
-            <Library
-              filteredLibrary={filteredLibrary}
-              categoryCounts={categoryCounts}
-              activeCategory={activeCategory}
-              setActiveCategory={selectCategory}
-              search={search}
-              deleteFile={deleteStoredFile}
-              selectedFileId={selectedFileId}
-              selectFile={setSelectedFileId}
-              onAddFiles={() => inputRef.current?.click()}
-            />
+            <div className='workspace-library-stage' aria-hidden={isDropZoneExpanded} inert={isDropZoneExpanded}>
+              <div className='workspace-library-stage-content'>
+                <Library
+                  filteredLibrary={filteredLibrary}
+                  categoryCounts={categoryCounts}
+                  activeCategory={activeCategory}
+                  setActiveCategory={selectCategory}
+                  search={search}
+                  deleteFile={deleteStoredFile}
+                  selectedFileId={selectedFileId}
+                  selectFile={setSelectedFileId}
+                  onAddFiles={() => inputRef.current?.click()}
+                />
+              </div>
+            </div>
           </div>
         </main>
 
